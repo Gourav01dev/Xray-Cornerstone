@@ -1,10 +1,13 @@
+import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import wasm from "vite-plugin-wasm";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    wasm(),
     {
       name: "configure-response-headers",
       configureServer: (server) => {
@@ -16,4 +19,15 @@ export default defineConfig({
       },
     },
   ],
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@cornerstonejs/tools": "@cornerstonejs/tools/dist/umd/index.js",
+    },
+  },
+  worker: {
+    plugins() {
+      return [wasm()];
+    },
+  },
 });
