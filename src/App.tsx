@@ -9,7 +9,7 @@ import { CrosshairsTool, LengthTool } from "@cornerstonejs/tools";
 import { toggleTool } from "./utils/toolHelper";
 
 function App() {
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isShowViewer, setIsShowViewer] = useState(false);
   const [selectedTool, setSelectedTool] = useState<"crosshairs" | "length">(
     "crosshairs"
   );
@@ -21,7 +21,7 @@ function App() {
         cornerstone.imageLoader.loadAndCacheImages(imageIds);
       })
       .then(() => {
-        setIsInitialized(true);
+        setIsShowViewer(true);
       });
 
     return () => {
@@ -35,9 +35,17 @@ function App() {
       <div>
         <h1 className="text-xl text-center m-4">Simple Volume Example</h1>
         <div className="flex gap-4 justify-center items-center">
-          {isInitialized ? <VolumeViewer imageIds={imageIds} /> : null}
+          {isShowViewer ? <VolumeViewer imageIds={imageIds} /> : null}
         </div>
         <div className="mt-3 flex justify-center gap-4">
+          <button
+            className={` text-xs border border-black p-2 round`}
+            onClick={() => {
+              setIsShowViewer((prev) => !prev);
+            }}
+          >
+            {isShowViewer ? "Hide Viewer" : "Show Viewer"}
+          </button>
           <button
             className={` text-xs border border-black p-2 rounded ${
               selectedTool === "crosshairs" && "bg-slate-300"

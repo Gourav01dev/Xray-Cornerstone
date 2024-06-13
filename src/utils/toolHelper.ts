@@ -1,5 +1,9 @@
 import * as cornerstoneTools from "@cornerstonejs/tools";
-import { toolGroupId, viewportIds } from "../data/cornerstoneIds";
+import {
+  toolGroupId,
+  viewportIds,
+  renderingEngineId,
+} from "../data/cornerstoneIds";
 
 const {
   ZoomTool,
@@ -50,7 +54,14 @@ export function toggleTool(toolName: string) {
   console.log(toolName);
 
   const toolGroup = ToolGroupManager.getToolGroup(toolGroupId);
+
   if (!toolGroup) return;
+  if (toolGroup?.getViewportIds.length === 0) {
+    viewportIds.forEach((viewportId) => {
+      toolGroup?.addViewport(viewportId, renderingEngineId);
+    });
+  }
+
   if (toolName === CrosshairsTool.toolName) {
     toolGroup.setToolActive(CrosshairsTool.toolName, {
       bindings: [{ mouseButton: 1 }],

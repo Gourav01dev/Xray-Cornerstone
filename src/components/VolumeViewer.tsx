@@ -3,7 +3,6 @@ import {
   viewportIds,
   volumeId,
   renderingEngineId,
-  toolGroupId,
 } from "../data/cornerstoneIds";
 import * as cornerstone from "@cornerstonejs/core";
 import {
@@ -11,7 +10,8 @@ import {
   PublicViewportInput,
 } from "@cornerstonejs/core/dist/types/types";
 import { StreamingImageVolume } from "@cornerstonejs/streaming-image-volume-loader";
-import { ToolGroupManager, utilities } from "@cornerstonejs/tools";
+import { CrosshairsTool, utilities } from "@cornerstonejs/tools";
+import { toggleTool } from "../utils/toolHelper";
 
 const { volumeLoader, getRenderingEngine, setVolumesForViewports, Enums } =
   cornerstone;
@@ -44,7 +44,7 @@ export default function VolumeViewer({ imageIds }: Props) {
     const viewport = renderingEngine?.getViewport(
       viewportId
     ) as IVolumeViewport;
-    console.log(viewport?.getProperties());
+    // console.log(viewport?.getProperties());
     const index = viewport?.getSliceIndex();
     if (index === undefined) return;
     // const total = viewport?.getNumberOfSlices();
@@ -127,10 +127,7 @@ export default function VolumeViewer({ imageIds }: Props) {
     async function initRender() {
       await initVolume();
       if (!renderingEngine) return;
-      const toolGroup = ToolGroupManager.getToolGroup(toolGroupId);
-      viewportIds.forEach((viewportId) => {
-        toolGroup?.addViewport(viewportId, renderingEngineId);
-      });
+
       renderingEngine.setViewports(viewportArray);
       volumeRef.current?.load(() => {});
 
@@ -172,6 +169,9 @@ export default function VolumeViewer({ imageIds }: Props) {
             handleSliceChange(viewportIds[2]);
           }
         );
+      })
+      .then(() => {
+        toggleTool(CrosshairsTool.toolName);
       });
 
     return () => {
