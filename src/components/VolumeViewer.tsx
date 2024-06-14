@@ -1,3 +1,5 @@
+// TODO: slab thickness slider
+
 import { Ref, useCallback, useEffect, useRef, useState } from "react";
 import {
   viewportIds,

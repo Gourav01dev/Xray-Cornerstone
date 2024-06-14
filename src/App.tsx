@@ -1,6 +1,11 @@
+// TODO: measurement clearing
+
 import "./App.css";
 import { initCornerstone } from "./utils/helpers";
-import { initCornerstoneToolGroup } from "./utils/toolHelper";
+import {
+  clearMeasurements,
+  initCornerstoneToolGroup,
+} from "./utils/toolHelper";
 import { imageIds } from "./data/iamgeIds";
 import { useEffect, useState } from "react";
 import * as cornerstone from "@cornerstonejs/core";
@@ -15,16 +20,22 @@ function App() {
   );
 
   useEffect(() => {
+    // In actual use case, Cornerstone should be initialized when app loads (app level)
     initCornerstone()
       .then(() => {
+        // Cornerstone tools can be initialized when app loads (app level), or create/destroy tool group at page level
         initCornerstoneToolGroup();
+
+        // In actual use case, image loader should load and caches images with image ids when page/container loads (page level)
         cornerstone.imageLoader.loadAndCacheImages(imageIds);
       })
       .then(() => {
+        // In actual use case, viewer should be initialized when image loader finishes loading images (component level)
         setIsShowViewer(true);
       });
 
     return () => {
+      // Can be done at page level
       cornerstone.cache.purgeCache();
       cornerstone.cache.purgeVolumeCache();
     };
@@ -39,7 +50,7 @@ function App() {
         </div>
         <div className="mt-3 flex justify-center gap-4">
           <button
-            className={` text-xs border border-black p-2 round`}
+            className={` text-xs border border-black p-2 rounded`}
             onClick={() => {
               setIsShowViewer((prev) => !prev);
             }}
@@ -67,6 +78,14 @@ function App() {
             }}
           >
             Length
+          </button>
+          <button
+            className="text-xs border border-black p-2 rounded"
+            onClick={() => {
+              clearMeasurements();
+            }}
+          >
+            Clear Length
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import * as cornerstoneTools from "@cornerstonejs/tools";
+import * as cornerstone from "@cornerstonejs/core";
 import {
   toolGroupId,
   viewportIds,
@@ -12,6 +13,7 @@ const {
   StackScrollMouseWheelTool,
   LengthTool,
   ToolGroupManager,
+  annotation,
 } = cornerstoneTools;
 
 const viewportColors = {
@@ -40,9 +42,6 @@ export function initCornerstoneToolGroup() {
   toolGroup.addTool(LengthTool.toolName);
   toolGroup.addTool(StackScrollMouseWheelTool.toolName);
 
-  toolGroup.setToolActive(CrosshairsTool.toolName, {
-    bindings: [{ mouseButton: 1 }],
-  });
   toolGroup.setToolActive(ZoomTool.toolName, {
     bindings: [{ mouseButton: 2 }],
   });
@@ -76,7 +75,30 @@ export function toggleTool(toolName: string) {
   }
 }
 
-// Maybe this can be used for auto jump to nodule position when selecting nodule?
+export function clearMeasurements() {
+  // Basically you can access annotations with annotation manager here
+  const annotationManaager = annotation.state.getAnnotationManager();
+
+  const annotations = annotationManaager.getAllAnnotations();
+
+  // We only want to remove length measurements, not crosshairs
+  // By filtering viewPlaneNormal in metadata, we can also filter which viewport direction to clear
+  const legnthAnnotations = annotations.filter(
+    (annotation) => annotation.metadata.toolName === LengthTool.toolName
+  );
+  console.log(legnthAnnotations);
+  legnthAnnotations.forEach((annotation) => {
+    if (!annotation.annotationUID) return;
+    annotationManaager.removeAnnotation(annotation.annotationUID);
+  });
+
+  // Rerender viewport because after annotations are removed
+  const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+  renderingEngine?.render();
+}
+
+// Maybe this can be used for auto jump crosshairs to nodule position when selecting nodule in Deep Lung?
+
 // https://www.cornerstonejs.org/api/tools/class/crosshairstool/#addNewAnnotation
 // addNewAnnotation
 // addNewAnnotation(evt: InteractionEventType): CrosshairsAnnotation
