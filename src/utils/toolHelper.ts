@@ -16,6 +16,8 @@ const {
   annotation,
 } = cornerstoneTools;
 
+const { utilities } = cornerstone;
+
 const viewportColors = {
   [viewportIds[0]]: "rgb(200, 0, 0)",
   [viewportIds[1]]: "rgb(200, 100, 0)",
@@ -47,6 +49,22 @@ export function initCornerstoneToolGroup() {
   });
   toolGroup.setToolActive(PanTool.toolName, { bindings: [{ mouseButton: 3 }] });
   toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
+
+  const styles = annotation.config.style.getDefaultToolStyles();
+
+  const newStyles = {
+    // TODO: styles for other states
+    [LengthTool.toolName]: {
+      colorHighlighted: "rgb(255,0,0)",
+    },
+    global: {
+      lineDash: "5,3",
+    },
+  };
+
+  annotation.config.style.setDefaultToolStyles(
+    utilities.deepMerge(styles, newStyles)
+  );
 }
 
 export function toggleTool(toolName: string) {
@@ -65,7 +83,7 @@ export function toggleTool(toolName: string) {
     toolGroup.setToolActive(CrosshairsTool.toolName, {
       bindings: [{ mouseButton: 1 }],
     });
-    toolGroup.setToolPassive(LengthTool.toolName);
+    toolGroup.setToolEnabled(LengthTool.toolName);
   }
   if (toolName === LengthTool.toolName) {
     toolGroup.setToolDisabled(CrosshairsTool.toolName);
@@ -98,13 +116,15 @@ export function clearMeasurements() {
 }
 
 export function deleteCurrentMeasurement() {
+  const toolGroup = ToolGroupManager.getToolGroup(toolGroupId);
+  if (toolGroup?.currentActivePrimaryToolName !== LengthTool.toolName) return;
+
   const annotationManaager = annotation.state.getAnnotationManager();
   const annotations = annotationManaager.getAllAnnotations();
 
   const legnthAnnotations = annotations.filter(
     (annotation) => annotation.metadata.toolName === LengthTool.toolName
   );
-  console.log(legnthAnnotations);
   const highlightedAnnotations = legnthAnnotations.filter(
     (annotation) => annotation.highlighted
   );
