@@ -1,4 +1,6 @@
-// TODO: slab thickness slider
+// TODO: add slab thickness slider
+// TODO: expose viewport parameters
+// TODO: abstract handlers and useEffect callbacks to hooks
 
 import { Ref, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -13,7 +15,7 @@ import {
 } from "@cornerstonejs/core/dist/types/types";
 import { StreamingImageVolume } from "@cornerstonejs/streaming-image-volume-loader";
 import { CrosshairsTool, utilities } from "@cornerstonejs/tools";
-import { toggleTool } from "../utils/toolHelper";
+import { deleteCurrentMeasurement, toggleTool } from "../utils/toolHelper";
 
 const { volumeLoader, getRenderingEngine, setVolumesForViewports, Enums } =
   cornerstone;
@@ -259,6 +261,7 @@ function ViewerElement({
         className="w-full aspect-square"
         onContextMenu={(e) => {
           e.preventDefault();
+          deleteCurrentMeasurement();
         }}
       >
         {children}

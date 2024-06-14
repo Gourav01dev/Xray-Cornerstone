@@ -97,6 +97,26 @@ export function clearMeasurements() {
   renderingEngine?.render();
 }
 
+export function deleteCurrentMeasurement() {
+  const annotationManaager = annotation.state.getAnnotationManager();
+  const annotations = annotationManaager.getAllAnnotations();
+
+  const legnthAnnotations = annotations.filter(
+    (annotation) => annotation.metadata.toolName === LengthTool.toolName
+  );
+  console.log(legnthAnnotations);
+  const highlightedAnnotations = legnthAnnotations.filter(
+    (annotation) => annotation.highlighted
+  );
+  highlightedAnnotations.forEach((annotation) => {
+    if (!annotation.annotationUID) return;
+    annotationManaager.removeAnnotation(annotation.annotationUID);
+  });
+
+  const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+  renderingEngine?.render();
+}
+
 // Maybe this can be used for auto jump crosshairs to nodule position when selecting nodule in Deep Lung?
 
 // https://www.cornerstonejs.org/api/tools/class/crosshairstool/#addNewAnnotation
