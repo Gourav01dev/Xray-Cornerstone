@@ -26,6 +26,7 @@ export default function ToolBar({
         onClick={() => {
           setIsShowViewer((prev) => !prev);
           setSelectedTool("crosshairs");
+          setSlabThickness(1);
         }}
       >
         {isShowViewer ? "Hide Viewer" : "Show Viewer"}
