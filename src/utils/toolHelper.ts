@@ -1,3 +1,5 @@
+//TODO: add ww/wc tools
+
 import * as cornerstoneTools from "@cornerstonejs/tools";
 import * as cornerstone from "@cornerstonejs/core";
 import {

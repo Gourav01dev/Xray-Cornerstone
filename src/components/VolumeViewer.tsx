@@ -1,4 +1,3 @@
-// TODO: add slab thickness slider
 // TODO: abstract handlers and useEffect callbacks to hooks and factories
 // TODO: demo how to change viewports and swtich volume (for comparing different volumes using the same viewports and changing layout)
 
