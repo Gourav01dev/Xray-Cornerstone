@@ -1,6 +1,5 @@
 // TODO: add slab thickness slider
-// TODO: expose viewport parameters
-// TODO: abstract handlers and useEffect callbacks to hooks
+// TODO: abstract handlers and useEffect callbacks to hooks and factories
 
 import { Ref, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -11,19 +10,32 @@ import {
 import * as cornerstone from "@cornerstonejs/core";
 import {
   IVolumeViewport,
+  Point2,
   PublicViewportInput,
 } from "@cornerstonejs/core/dist/types/types";
 import { StreamingImageVolume } from "@cornerstonejs/streaming-image-volume-loader";
 import { CrosshairsTool, utilities } from "@cornerstonejs/tools";
 import { deleteCurrentMeasurement, toggleTool } from "../utils/toolHelper";
+import { handleCsResize } from "../utils/helpers";
 
 const { volumeLoader, getRenderingEngine, setVolumesForViewports, Enums } =
   cornerstone;
 const { OrientationAxis, ViewportType } = Enums;
 // const defaultDisplayRatio = 1 / 1.1;
 const defaultDisplayRatio = 1;
+const defaultViewportTransform = {
+  pan: [0, 0],
+  zoom: 1.1,
+  rotation: 0,
+} as ViewportTransform;
 
 type Props = { imageIds: string[] };
+
+type ViewportTransform = {
+  pan?: Point2;
+  zoom?: number;
+  rotation?: number;
+};
 
 export default function VolumeViewer({ imageIds }: Props) {
   const initialAxialSlice = Math.floor(imageIds.length / 2);
@@ -37,18 +49,21 @@ export default function VolumeViewer({ imageIds }: Props) {
   const [axialSlice, setAxialSlice] = useState(initialAxialSlice - 1);
   const [coronalSlice, setCoronalSlice] = useState(255);
   const [segittalSlice, setSegittalSlice] = useState(255);
-
-  const handleResize = useCallback(() => {
-    const renderingEngine = getRenderingEngine(renderingEngineId);
-    renderingEngine?.resize(true, true);
-  }, []);
+  const [axialTransform, setAxialTransform] = useState(
+    defaultViewportTransform
+  );
+  const [coronalTransform, setCoronalTransform] = useState(
+    defaultViewportTransform
+  );
+  const [segittalTransform, setSegittalTransform] = useState(
+    defaultViewportTransform
+  );
 
   const handleSliceChange = useCallback((viewportId: string) => {
     const renderingEngine = getRenderingEngine(renderingEngineId);
     const viewport = renderingEngine?.getViewport(
       viewportId
     ) as IVolumeViewport;
-    // console.log(viewport?.getProperties());
     const index = viewport?.getSliceIndex();
     if (index === undefined) return;
     // const total = viewport?.getNumberOfSlices();
@@ -63,6 +78,23 @@ export default function VolumeViewer({ imageIds }: Props) {
     }
   }, []);
 
+  const handleCameraChange = useCallback((viewportId: string) => {
+    const renderingEngine = getRenderingEngine(renderingEngineId);
+    const viewport = renderingEngine?.getViewport(
+      viewportId
+    ) as IVolumeViewport;
+    const { pan, zoom, rotation } = viewport.getViewPresentation();
+    if (viewportId === viewportIds[0]) {
+      setAxialTransform({ pan, zoom, rotation });
+    }
+    if (viewportId === viewportIds[1]) {
+      setCoronalTransform({ pan, zoom, rotation });
+    }
+    if (viewportId === viewportIds[2]) {
+      setSegittalTransform({ pan, zoom, rotation });
+    }
+  }, []);
+
   const handleScrollSlice = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, viewportId: string) => {
       const renderingEngine = getRenderingEngine(renderingEngineId);
@@ -74,12 +106,12 @@ export default function VolumeViewer({ imageIds }: Props) {
   );
 
   useEffect(() => {
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleCsResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleCsResize);
     };
-  }, [handleResize]);
+  }, []);
 
   useEffect(() => {
     const axial = axialRef.current;
@@ -155,12 +187,14 @@ export default function VolumeViewer({ imageIds }: Props) {
         }
       })
       .then(() => {
+        // abstract to hook and use viewportIds + viewport.element instead
         axial?.addEventListener(
           cornerstone.Enums.Events.VOLUME_NEW_IMAGE,
           () => {
             handleSliceChange(viewportIds[0]);
           }
         );
+
         coronal?.addEventListener(
           cornerstone.Enums.Events.VOLUME_NEW_IMAGE,
           () => {
@@ -171,6 +205,24 @@ export default function VolumeViewer({ imageIds }: Props) {
           cornerstone.Enums.Events.VOLUME_NEW_IMAGE,
           () => {
             handleSliceChange(viewportIds[2]);
+          }
+        );
+        axial?.addEventListener(
+          cornerstone.Enums.Events.CAMERA_MODIFIED,
+          () => {
+            handleCameraChange(viewportIds[0]);
+          }
+        );
+        coronal?.addEventListener(
+          cornerstone.Enums.Events.CAMERA_MODIFIED,
+          () => {
+            handleCameraChange(viewportIds[1]);
+          }
+        );
+        segittal?.addEventListener(
+          cornerstone.Enums.Events.CAMERA_MODIFIED,
+          () => {
+            handleCameraChange(viewportIds[2]);
           }
         );
       })
@@ -197,8 +249,26 @@ export default function VolumeViewer({ imageIds }: Props) {
           handleSliceChange(viewportIds[2]);
         }
       );
+      axial?.removeEventListener(
+        cornerstone.Enums.Events.CAMERA_MODIFIED,
+        () => {
+          handleCameraChange(viewportIds[0]);
+        }
+      );
+      coronal?.removeEventListener(
+        cornerstone.Enums.Events.CAMERA_MODIFIED,
+        () => {
+          handleCameraChange(viewportIds[1]);
+        }
+      );
+      segittal?.removeEventListener(
+        cornerstone.Enums.Events.CAMERA_MODIFIED,
+        () => {
+          handleCameraChange(viewportIds[2]);
+        }
+      );
     };
-  }, [imageIds, handleSliceChange]);
+  }, [imageIds, handleSliceChange, handleCameraChange]);
 
   return (
     <>
@@ -214,6 +284,7 @@ export default function VolumeViewer({ imageIds }: Props) {
           handleScrollSlice={handleScrollSlice}
           viewportId={viewportIds[0]}
         />
+        <ViewerTransformInfo transform={axialTransform} />
       </ViewerContainer>
       <ViewerContainer>
         <ViewerLabels>{coronalSlice + 1} / 512</ViewerLabels>
@@ -224,6 +295,7 @@ export default function VolumeViewer({ imageIds }: Props) {
           handleScrollSlice={handleScrollSlice}
           viewportId={viewportIds[1]}
         />
+        <ViewerTransformInfo transform={coronalTransform} />
       </ViewerContainer>
       <ViewerContainer>
         <ViewerLabels>{segittalSlice + 1} / 512</ViewerLabels>
@@ -234,6 +306,7 @@ export default function VolumeViewer({ imageIds }: Props) {
           handleScrollSlice={handleScrollSlice}
           viewportId={viewportIds[2]}
         />
+        <ViewerTransformInfo transform={segittalTransform} />
       </ViewerContainer>
     </>
   );
@@ -302,6 +375,22 @@ function ViewerLabels({ children }: { children: React.ReactNode }) {
   return (
     <div className=" absolute text-green-500 z-10 ml-2 mt-2 text-xs">
       {children}
+    </div>
+  );
+}
+
+// these exposed viewport presentation properties can be utilized by other features
+function ViewerTransformInfo({ transform }: { transform: ViewportTransform }) {
+  const { pan, zoom, rotation } = transform;
+  const panText = pan ? `(${pan[0].toFixed(2)}, ${pan[1].toFixed(2)})` : "--";
+  const zoomText = `${zoom?.toFixed(2)}` || "--";
+  const rotationText = `${rotation?.toFixed(2)}` || "--";
+
+  return (
+    <div className=" absolute bottom-0 text-green-500 z-10 ml-2 mb-2 text-xs">
+      <p>
+        P: {panText} / Z: {zoomText} / R: {rotationText}
+      </p>
     </div>
   );
 }

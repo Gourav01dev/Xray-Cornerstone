@@ -5,6 +5,7 @@ import {
   viewportIds,
   renderingEngineId,
 } from "../data/cornerstoneIds";
+import { viewportColors, newStyles } from "../data/cornerstoneToolStyles";
 
 const {
   ZoomTool,
@@ -18,11 +19,8 @@ const {
 
 const { utilities } = cornerstone;
 
-const viewportColors = {
-  [viewportIds[0]]: "rgb(200, 0, 0)",
-  [viewportIds[1]]: "rgb(200, 100, 0)",
-  [viewportIds[2]]: "rgb(0, 200, 0)",
-};
+// cornerstone annotation styles
+// https://www.cornerstonejs.org/docs/concepts/cornerstone-tools/annotation/config
 
 function getReferenceLineColor(viewportId: string) {
   return viewportColors[viewportId];
@@ -51,16 +49,6 @@ export function initCornerstoneToolGroup() {
   toolGroup.setToolActive(StackScrollMouseWheelTool.toolName);
 
   const styles = annotation.config.style.getDefaultToolStyles();
-
-  const newStyles = {
-    // TODO: styles for other states
-    [LengthTool.toolName]: {
-      colorHighlighted: "rgb(255,0,0)",
-    },
-    global: {
-      lineDash: "5,3",
-    },
-  };
 
   annotation.config.style.setDefaultToolStyles(
     utilities.deepMerge(styles, newStyles)
@@ -94,7 +82,7 @@ export function toggleTool(toolName: string) {
 }
 
 export function clearMeasurements() {
-  // Basically you can access annotations with annotation manager here
+  // Basically you can access annotations via annotation manager here
   const annotationManaager = annotation.state.getAnnotationManager();
 
   const annotations = annotationManaager.getAllAnnotations();
