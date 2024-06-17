@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { clearMeasurements, toggleTool } from "../utils/toolHelper";
 import { CrosshairsTool, LengthTool } from "@cornerstonejs/tools";
+import { handleCsResetCamera } from "../utils/helpers";
 
 type ToolBarProps = {
   setIsShowViewer: React.Dispatch<React.SetStateAction<boolean>>;
@@ -31,6 +32,7 @@ export default function ToolBar({
           toggleTool(CrosshairsTool.toolName);
           setSelectedTool("crosshairs");
         }}
+        disabled={!isShowViewer}
       >
         Crosshairs
       </ToolBarButton>
@@ -40,6 +42,7 @@ export default function ToolBar({
           toggleTool(LengthTool.toolName);
           setSelectedTool("length");
         }}
+        disabled={!isShowViewer}
       >
         Length
       </ToolBarButton>
@@ -50,20 +53,13 @@ export default function ToolBar({
       >
         Clear Length
       </ToolBarButton>
-      {/* <button
-            className="text-xs border border-black p-2 rounded"
-            onClick={() => {
-              const renderingEnine =
-                cornerstone.getRenderingEngine(renderingEngineId);
-              const viewports = renderingEnine?.getVolumeViewports();
-              console.log(viewports);
-              viewports?.forEach((viewport) => {
-                console.log(viewport.getViewPresentation());
-              });
-            }}
-          >
-            Get Viewports
-          </button> */}
+      <ToolBarButton
+        onClick={() => {
+          handleCsResetCamera();
+        }}
+      >
+        Reset Camera
+      </ToolBarButton>
     </div>
   );
 }
@@ -72,15 +68,17 @@ function ToolBarButton({
   ...props
 }: React.PropsWithChildren<React.BaseHTMLAttributes<HTMLButtonElement>> & {
   selected?: boolean;
+  disabled?: boolean;
 }) {
-  const { children, selected } = props;
+  const { children, selected, disabled } = props;
 
   return (
     <button
       {...props}
       className={`text-xs border border-black p-2 rounded ${
         selected && "bg-slate-300"
-      }`}
+      } ${disabled && "opacity-50"}`}
+      disabled={disabled}
     >
       {children}
     </button>

@@ -24,11 +24,17 @@ export async function initCornerstone() {
   new RenderingEngine(renderingEngineId);
 }
 
-export function handleCsResize() {
+function getCsViewports() {
   const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
   const viewports = renderingEngine?.getViewports() as
     | IVolumeViewport[]
     | undefined;
+  return viewports;
+}
+
+export function handleCsResize() {
+  const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+  const viewports = getCsViewports();
   if (!viewports) return;
   const presentations = viewports.map((viewport) => {
     return viewport.getViewPresentation();
@@ -36,5 +42,13 @@ export function handleCsResize() {
   renderingEngine?.resize(true, true);
   viewports.forEach((viewport, idx) => {
     viewport.setViewPresentation(presentations[idx]);
+  });
+}
+
+export function handleCsResetCamera() {
+  const viewports = getCsViewports();
+  if (!viewports) return;
+  viewports.forEach((viewport) => {
+    viewport.resetCamera();
   });
 }

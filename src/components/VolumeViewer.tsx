@@ -1,5 +1,6 @@
 // TODO: add slab thickness slider
 // TODO: abstract handlers and useEffect callbacks to hooks and factories
+// TODO: demo how to change viewports and swtich volume (for comparing different volumes using the same viewports and changing layout)
 
 import { Ref, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -380,6 +381,7 @@ function ViewerLabels({ children }: { children: React.ReactNode }) {
 }
 
 // these exposed viewport presentation properties can be utilized by other features
+// you can use getViewportPresentation() to get viewport presentation properties
 function ViewerTransformInfo({ transform }: { transform: ViewportTransform }) {
   const { pan, zoom, rotation } = transform;
   const panText = pan ? `(${pan[0].toFixed(2)}, ${pan[1].toFixed(2)})` : "--";
