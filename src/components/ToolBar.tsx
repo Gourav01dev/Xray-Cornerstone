@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { clearMeasurements, toggleTool } from "../utils/toolHelper";
 import { CrosshairsTool, LengthTool } from "@cornerstonejs/tools";
-import { handleCsResetCamera } from "../utils/helpers";
+import {
+  handleCsResetCamera,
+  handleCsSetSlabThickness,
+} from "../utils/helpers";
 
 type ToolBarProps = {
   setIsShowViewer: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,6 +18,7 @@ export default function ToolBar({
   const [selectedTool, setSelectedTool] = useState<"crosshairs" | "length">(
     "crosshairs"
   );
+  const [slabThickness, setSlabThickness] = useState(1);
 
   return (
     <div className="mt-3 flex justify-center gap-4">
@@ -60,6 +64,19 @@ export default function ToolBar({
       >
         Reset Camera
       </ToolBarButton>
+      <label className="text-xs self-center ">Slab Thickness:</label>
+      <select
+        className="border rounded border-gray-800 text-xs"
+        onChange={(e) => {
+          setSlabThickness(+e.target.value);
+          handleCsSetSlabThickness(+e.target.value);
+        }}
+        value={slabThickness}
+      >
+        <option value={1}>1</option>
+        <option value={5}>5</option>
+        <option value={10}>10</option>
+      </select>
     </div>
   );
 }

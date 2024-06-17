@@ -52,3 +52,13 @@ export function handleCsResetCamera() {
     viewport.resetCamera();
   });
 }
+
+export function handleCsSetSlabThickness(thickness: number) {
+  const viewports = getCsViewports();
+  if (!viewports) return;
+  viewports.forEach((viewport) => {
+    viewport.setSlabThickness(thickness);
+  });
+  const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+  renderingEngine?.render();
+}
