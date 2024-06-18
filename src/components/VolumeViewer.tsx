@@ -176,7 +176,9 @@ export default function VolumeViewer({ imageIds }: Props) {
       if (!renderingEngine) return;
 
       renderingEngine.setViewports(viewportArray);
-      volumeRef.current?.load(() => {});
+      volumeRef.current?.load(() => {
+        setIsVolumeLoaded(true);
+      });
 
       await setVolumesForViewports(
         renderingEngine,
@@ -184,7 +186,6 @@ export default function VolumeViewer({ imageIds }: Props) {
         viewportIds
       );
       renderingEngine.renderViewports(viewportIds);
-      setIsVolumeLoaded(true);
     }
 
     initRender()
@@ -283,7 +284,9 @@ export default function VolumeViewer({ imageIds }: Props) {
 
   return (
     <>
-      {!isVolumeLoaded && <p className="absolute">Loading volume...</p>}
+      {!isVolumeLoaded && (
+        <p className="absolute text-green-500 z-50">Loading volume...</p>
+      )}
       <ViewerContainer>
         <ViewerLabels>
           {axialSlice + 1} / {imageIds.length}
