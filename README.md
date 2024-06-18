@@ -6,8 +6,9 @@ This repository contains live demo showcasing a basic DICOM viewer built with Co
 
 - Rendering DICOM in volumes
 - Cornerstone3D tools usage
-- exposing viewport properties
+- Exposing viewport properties
 - Setting slab thickness
+- Slab scroll toggle
 
 ### Resources
 

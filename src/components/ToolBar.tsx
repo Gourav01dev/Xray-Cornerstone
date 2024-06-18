@@ -30,6 +30,7 @@ export default function ToolBar({
         onClick={() => {
           setIsShowViewer((prev) => !prev);
           setSelectedTool("crosshairs");
+          setIsSlabScroll(false);
         }}
       >
         {isShowViewer ? "Hide Viewer" : "Show Viewer"}

@@ -58,6 +58,9 @@ export default function VolumeViewer({ imageIds }: Props) {
   const [segittalTransform, setSegittalTransform] = useState(
     defaultViewportTransform
   );
+  const [axialSlabThickness, setAxialSlabThickness] = useState<number>();
+  const [coronalSlabThickness, setCoronalSlabThickness] = useState<number>();
+  const [segittalSlabThickness, setSegittalSlabThickness] = useState<number>();
 
   const handleSliceChange = useCallback((viewportId: string) => {
     const renderingEngine = getRenderingEngine(renderingEngineId);
@@ -83,15 +86,23 @@ export default function VolumeViewer({ imageIds }: Props) {
     const viewport = renderingEngine?.getViewport(
       viewportId
     ) as IVolumeViewport;
+
     const { pan, zoom, rotation } = viewport.getViewPresentation();
+
+    // CAMERA_MODIFIED event is also triggered when slab thickness changes, which can sync with React state
+    const slabThickness = viewport.getSlabThickness();
+
     if (viewportId === viewportIds[0]) {
       setAxialTransform({ pan, zoom, rotation });
+      setAxialSlabThickness(slabThickness);
     }
     if (viewportId === viewportIds[1]) {
       setCoronalTransform({ pan, zoom, rotation });
+      setCoronalSlabThickness(slabThickness);
     }
     if (viewportId === viewportIds[2]) {
       setSegittalTransform({ pan, zoom, rotation });
+      setSegittalSlabThickness(slabThickness);
     }
   }, []);
 
@@ -284,7 +295,10 @@ export default function VolumeViewer({ imageIds }: Props) {
           handleScrollSlice={handleScrollSlice}
           viewportId={viewportIds[0]}
         />
-        <ViewerTransformInfo transform={axialTransform} />
+        <ViewerTransformInfo
+          transform={axialTransform}
+          slabThickness={axialSlabThickness}
+        />
       </ViewerContainer>
       <ViewerContainer>
         <ViewerLabels>{coronalSlice + 1} / 512</ViewerLabels>
@@ -295,7 +309,10 @@ export default function VolumeViewer({ imageIds }: Props) {
           handleScrollSlice={handleScrollSlice}
           viewportId={viewportIds[1]}
         />
-        <ViewerTransformInfo transform={coronalTransform} />
+        <ViewerTransformInfo
+          transform={coronalTransform}
+          slabThickness={coronalSlabThickness}
+        />
       </ViewerContainer>
       <ViewerContainer>
         <ViewerLabels>{segittalSlice + 1} / 512</ViewerLabels>
@@ -306,7 +323,10 @@ export default function VolumeViewer({ imageIds }: Props) {
           handleScrollSlice={handleScrollSlice}
           viewportId={viewportIds[2]}
         />
-        <ViewerTransformInfo transform={segittalTransform} />
+        <ViewerTransformInfo
+          transform={segittalTransform}
+          slabThickness={segittalSlabThickness}
+        />
       </ViewerContainer>
     </>
   );
@@ -381,7 +401,13 @@ function ViewerLabels({ children }: { children: React.ReactNode }) {
 
 // these exposed viewport presentation properties can be utilized by other features
 // you can use getViewportPresentation() to get viewport presentation properties
-function ViewerTransformInfo({ transform }: { transform: ViewportTransform }) {
+function ViewerTransformInfo({
+  transform,
+  slabThickness,
+}: {
+  transform: ViewportTransform;
+  slabThickness: number | undefined;
+}) {
   const { pan, zoom, rotation } = transform;
   const panText = pan ? `(${pan[0].toFixed(2)}, ${pan[1].toFixed(2)})` : "--";
   const zoomText = `${zoom?.toFixed(2)}` || "--";
@@ -390,7 +416,8 @@ function ViewerTransformInfo({ transform }: { transform: ViewportTransform }) {
   return (
     <div className=" absolute bottom-0 text-green-500 z-10 ml-2 mb-2 text-xs">
       <p>
-        P: {panText} / Z: {zoomText} / R: {rotationText}
+        P: {panText} / Z: {zoomText} / R: {rotationText} / S:{" "}
+        {slabThickness?.toFixed(2) || "--"}
       </p>
     </div>
   );
