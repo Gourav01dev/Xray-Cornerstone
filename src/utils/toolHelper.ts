@@ -127,7 +127,21 @@ export function deleteCurrentMeasurement() {
   renderingEngine?.render();
 }
 
-// Maybe this can be used for auto jump crosshairs to nodule position when selecting nodule in Deep Lung?
+export function toggleSlabScroll() {
+  const toolGroup = ToolGroupManager.getToolGroup(toolGroupId);
+  const config = toolGroup?.getToolConfiguration(
+    StackScrollMouseWheelTool.toolName
+  );
+  console.log(config);
+
+  const newState = !config.scrollSlabs;
+  toolGroup?.setToolConfiguration(StackScrollMouseWheelTool.toolName, {
+    scrollSlabs: newState,
+  });
+  return newState;
+}
+
+// Maybe this can be used for auto jump crosshairs to nodule position when selecting nodules?
 
 // https://www.cornerstonejs.org/api/tools/class/crosshairstool/#addNewAnnotation
 // addNewAnnotation

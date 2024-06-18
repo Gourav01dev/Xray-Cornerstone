@@ -6,7 +6,7 @@ import { cornerstoneStreamingImageVolumeLoader } from "@cornerstonejs/streaming-
 import { renderingEngineId } from "../data/cornerstoneIds";
 import { IVolumeViewport } from "@cornerstonejs/core/dist/types/types";
 
-const { RenderingEngine, volumeLoader } = cornerstone;
+const { RenderingEngine, volumeLoader, Enums } = cornerstone;
 const { registerVolumeLoader } = volumeLoader;
 
 export async function initCornerstone() {
@@ -53,12 +53,17 @@ export function handleCsResetCamera() {
   });
 }
 
+// example of how to configure viewport slab thickness, pitfall: you must specify blend mode as well
+// https://github.com/cornerstonejs/cornerstone3D/blob/db03776bbec0e42811340a933744aea4261b5d18/packages/tools/examples/volumeSlabScroll/index.ts
+// https://www.cornerstonejs.org/live-examples/volumeslabscroll
 export function handleCsSetSlabThickness(thickness: number) {
   const viewports = getCsViewports();
   if (!viewports) return;
   viewports.forEach((viewport) => {
-    viewport.setSlabThickness(thickness);
+    viewport.setProperties({ slabThickness: thickness });
+    viewport.setBlendMode(Enums.BlendModes.MAXIMUM_INTENSITY_BLEND);
   });
   const renderingEngine = cornerstone.getRenderingEngine(renderingEngineId);
+
   renderingEngine?.render();
 }
