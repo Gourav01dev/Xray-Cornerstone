@@ -27,25 +27,6 @@ export default function ToolBar({
   return (
     <div className="mt-3 flex justify-center gap-4">
       <ToolBarButton
-        onClick={() => {
-          setIsShowViewer((prev) => !prev);
-          setSelectedTool("crosshairs");
-          setIsSlabScroll(false);
-        }}
-      >
-        {isShowViewer ? "Hide Viewer" : "Show Viewer"}
-      </ToolBarButton>
-      <ToolBarButton
-        selected={selectedTool === "crosshairs"}
-        onClick={() => {
-          toggleTool(CrosshairsTool.toolName);
-          setSelectedTool("crosshairs");
-        }}
-        disabled={!isShowViewer}
-      >
-        Crosshairs
-      </ToolBarButton>
-      <ToolBarButton
         selected={selectedTool === "length"}
         onClick={() => {
           toggleTool(LengthTool.toolName);
@@ -54,35 +35,6 @@ export default function ToolBar({
         disabled={!isShowViewer}
       >
         Length
-      </ToolBarButton>
-      <ToolBarButton
-        onClick={() => {
-          clearMeasurements();
-        }}
-      >
-        Clear Length
-      </ToolBarButton>
-      <ToolBarButton
-        onClick={() => {
-          handleCsResetCamera();
-        }}
-      >
-        Reset Camera
-      </ToolBarButton>
-      <ToolBarButton
-        onClick={() => {
-          handleCsSetSlabThickness(10);
-        }}
-      >
-        Slab Thickness: 10
-      </ToolBarButton>
-      <ToolBarButton
-        onClick={() => {
-          const newState = toggleSlabScroll();
-          setIsSlabScroll(newState);
-        }}
-      >
-        Slab Scroll: {isSlabScroll ? "On" : "Off"}
       </ToolBarButton>
     </div>
   );
@@ -99,9 +51,8 @@ function ToolBarButton({
   return (
     <button
       {...props}
-      className={`text-xs border border-black p-2 rounded ${
-        selected && "bg-slate-300"
-      } ${disabled && "opacity-50"}`}
+      className={`text-xs border border-black p-2 rounded ${selected && "bg-slate-300"
+        } ${disabled && "opacity-50"}`}
       disabled={disabled}
     >
       {children}

@@ -9,7 +9,7 @@ import ToolBar from "./components/ToolBar";
 
 function App() {
   const [isShowViewer, setIsShowViewer] = useState(false);
-
+console.log('imageIds', imageIds);
   useEffect(() => {
     // In actual use case, Cornerstone should be initialized when app loads (app level)
     initCornerstone()
@@ -35,7 +35,7 @@ function App() {
   return (
     <>
       <div>
-        <h1 className="text-xl text-center m-4">Simple Volume Example</h1>
+        <h1 className="text-xl text-center m-4">.</h1>
         <div className="flex gap-4 justify-center items-center">
           {isShowViewer ? <VolumeViewer imageIds={imageIds} /> : null}
         </div>

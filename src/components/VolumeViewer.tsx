@@ -282,11 +282,43 @@ export default function VolumeViewer({ imageIds }: Props) {
     };
   }, [imageIds, handleSliceChange, handleCameraChange]);
 
+  const handleTransform = useCallback((operation: string) => {
+    const renderingEngine = getRenderingEngine(renderingEngineId);
+    if (!renderingEngine) return;
+
+    viewportIds.forEach((viewportId) => {
+      const viewport = renderingEngine.getViewport(viewportId) as IVolumeViewport;
+      if (!viewport) return;
+
+      let { pan, zoom, rotation } = viewport.getViewPresentation();
+
+      if (operation === "flipH") {
+        // Flip horizontally: Reverse the X-axis pan
+        pan = [-pan[0], pan[1]];
+      } else if (operation === "flipV") {
+        // Flip vertically: Reverse the Y-axis pan
+        pan = [pan[0], -pan[1]];
+      } else if (operation === "rotate90") {
+        // Rotate 90 degrees
+        rotation = (rotation + 90) % 360;
+      }
+
+      // Set the transformed presentation
+      viewport.setViewPresentation({ pan, zoom, rotation });
+      viewport.render();
+    });
+  }, []);
+
   return (
     <>
       {!isVolumeLoaded && (
         <p className="absolute text-green-500 z-50">Loading volume...</p>
       )}
+      <div className="absolute top-0 left-0 right-0 p-2 flex justify-center space-x-2 mb-4 z-10">
+        <button onClick={() => handleTransform("flipH")} className="p-2 bg-gray-800 text-white rounded">Flip H</button>
+        <button onClick={() => handleTransform("flipV")} className="p-2 bg-gray-800 text-white rounded">Flip V</button>
+        <button onClick={() => handleTransform("rotate90")} className="p-2 bg-gray-800 text-white rounded">Rotate 90°</button>
+      </div>
       <ViewerContainer>
         <ViewerLabels>
           {axialSlice + 1} / {imageIds.length}
